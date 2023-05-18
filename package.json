@@ -28,9 +28,21 @@
     "@types/cheerio": "^0.22.31",
     "@types/lodash": "^4.14.194",
     "@types/node": "latest",
+    "@types/prop-types": "^15.7.5",
     "@types/react": "latest",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
+    "autoprefixer": "^10.4.14",
     "eslint": "latest",
     "eslint-config-next": "latest",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "lint-staged": "^13.2.2",
+    "prettier": "^2.8.8",
     "typescript": "latest"
   }
 }

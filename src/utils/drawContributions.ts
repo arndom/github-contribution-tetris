@@ -1,36 +1,31 @@
-// Largely based on https://github.com/sallar/github-contributions-canvas
+// Based on https://github.com/sallar/github-contributions-canvas/blob/master/src/index.ts
 
-import addWeeks from "date-fns/addWeeks";
-import format from "date-fns/format";
-import getMonth from "date-fns/getMonth";
-import isAfter from "date-fns/isAfter";
-import isBefore from "date-fns/isBefore";
-import parseISO from "date-fns/parseISO";
-import setDay from "date-fns/setDay";
-import startOfWeek from "date-fns/startOfWeek";
+import { addWeeks, format, getMonth, isAfter, isBefore, parseISO, setDay, startOfWeek } from 'date-fns';
+
+import { Dispatch } from 'react';
 
 const themes = {
   standard: {
-    background: "#ffffff",
-    text: "#000000",
-    meta: "#666666",
-    grade4: "#216e39",
-    grade3: "#30a14e",
-    grade2: "#40c463",
-    grade1: "#9be9a8",
-    grade0: "#ebedf0"
+    background: '#ffffff',
+    text: '#000000',
+    meta: '#666666',
+    grade4: '#216e39',
+    grade3: '#30a14e',
+    grade2: '#40c463',
+    grade1: '#9be9a8',
+    grade0: '#ebedf0'
   },
 
   githubDark: {
-    background: "#101217",
-    text: "#ffffff",
-    meta: "#dddddd",
-    grade4: "#27d545",
-    grade3: "#10983d",
-    grade2: "#00602d",
-    grade1: "#003820",
-    grade0: "#161b22"
-  },
+    background: '#101217',
+    text: '#ffffff',
+    meta: '#dddddd',
+    grade4: '#27d545',
+    grade3: '#10983d',
+    grade2: '#00602d',
+    grade1: '#003820',
+    grade0: '#161b22'
+  }
 };
 
 interface DataStructContribution {
@@ -77,6 +72,8 @@ interface DrawMetadataOptions extends Options {
 }
 
 interface Theme {
+  [key: string]: string;
+
   background: string;
   text: string;
   meta: string;
@@ -88,21 +85,22 @@ interface Theme {
 }
 
 function getPixelRatio() {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return 1;
   }
+
   return window.devicePixelRatio || 1;
 }
 
-const DATE_FORMAT = "yyyy-MM-dd";
-const boxWidth = 10;
-const boxMargin = 2;
-const textHeight = 15;
-const defaultFontFace = "IBM Plex Mono";
-const headerHeight = 60;
-const canvasMargin = 20;
-const yearHeight = textHeight + (boxWidth + boxMargin) * 7 + canvasMargin;
-const scaleFactor = getPixelRatio();
+const DATE_FORMAT = 'yyyy-MM-dd';
+export const boxWidth = 10;
+export const boxMargin = 2;
+export const textHeight = 15;
+export const defaultFontFace = 'IBM Plex Mono';
+export const headerHeight = 60;
+export const canvasMargin = 0; // 20
+export const yearHeight = textHeight + (boxWidth + boxMargin) * 7 + canvasMargin;
+export const scaleFactor = getPixelRatio();
 
 function getTheme(opts: Options): Theme {
   const { themeName, customTheme } = opts;
@@ -118,25 +116,21 @@ function getTheme(opts: Options): Theme {
       grade0: customTheme.grade0 ?? themes.standard.grade0
     };
   }
-  const name = themeName ?? "standard";
+  const name = themeName ?? 'standard';
+
   return themes[name] ?? themes.standard;
 }
 
 function getDateInfo(data: DataStruct, date: string) {
-  return data.contributions.find(contrib => contrib.date === date);
+  return data.contributions.find((contrib) => contrib.date === date);
 }
 
 function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
-  const {
-    offsetX = 0,
-    offsetY = 0,
-    data,
-    fontFace = defaultFontFace
-  } = opts;
+  const { offsetX = 0, offsetY = 0, data } = opts;
   const theme = getTheme(opts);
 
   const today = new Date();
-  const thisYear = format(today, "yyyy");
+  const thisYear = format(today, 'yyyy');
   const lastDate = data.year === thisYear ? today : parseISO(data.range.end);
   const firstRealDate = parseISO(`${data.year}-01-01`);
   const firstDate = startOfWeek(firstRealDate);
@@ -158,8 +152,9 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
 
   for (let i = 1; i < 7; i += 1) {
     graphEntries.push(
-      firstRowDates.map(dateObj => {
+      firstRowDates.map((dateObj) => {
         const date = format(setDay(parseISO(dateObj.date), i), DATE_FORMAT);
+
         return {
           date,
           info: getDateInfo(data, date)
@@ -168,22 +163,25 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
     );
   }
 
+  const contributionGrid: number[][] = [];
+
+  // 7
   for (let y = 0; y < graphEntries.length; y += 1) {
+    contributionGrid[y] = [];
+
+    // 52 | 53
     for (let x = 0; x < graphEntries[y].length; x += 1) {
       const day = graphEntries[y][x];
       const cellDate = parseISO(day.date);
       if (isAfter(cellDate, lastDate) || !day.info) {
         continue;
       }
-      // @ts-ignore
+
+      contributionGrid[y][x] = Number(day.info.intensity);
+
       const color = theme[`grade${day.info.intensity}`];
       ctx.fillStyle = color;
-      ctx.fillRect(
-        offsetX + (boxWidth + boxMargin) * x,
-        offsetY + textHeight + (boxWidth + boxMargin) * y,
-        10,
-        10
-      );
+      ctx.fillRect(offsetX + (boxWidth + boxMargin) * x, offsetY + textHeight + (boxWidth + boxMargin) * y, 10, 10);
     }
   }
 
@@ -196,35 +194,23 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
     const monthChanged = month !== lastCountedMonth;
     if (!opts.skipAxisLabel && monthChanged && !firstMonthIsDec) {
       ctx.fillStyle = theme.meta;
-      ctx.fillText(
-        format(date, "MMM"),
-        offsetX + (boxWidth + boxMargin) * y,
-        offsetY
-      );
+      ctx.fillText(format(date, 'MMM'), offsetX + (boxWidth + boxMargin) * y, offsetY);
       lastCountedMonth = month;
     }
   }
+
+  return contributionGrid;
 }
 
-function drawMetaData(
-  ctx: CanvasRenderingContext2D,
-  opts: DrawMetadataOptions
-) {
-  const {
-    username,
-    width,
-    height,
-    footerText,
-    data,
-    fontFace = defaultFontFace
-  } = opts;
+function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) {
+  const { username, width, height, footerText, data, fontFace = defaultFontFace } = opts;
   const theme = getTheme(opts);
   ctx.fillStyle = theme.background;
   ctx.fillRect(0, 0, width, height);
 
   if (footerText) {
     ctx.fillStyle = theme.meta;
-    ctx.textBaseline = "bottom";
+    ctx.textBaseline = 'bottom';
     ctx.font = `10px '${fontFace}'`;
     ctx.fillText(footerText, canvasMargin, height - 5);
   }
@@ -232,37 +218,24 @@ function drawMetaData(
   // chart legend
   let themeGrades = 5;
   ctx.fillStyle = theme.text;
-  ctx.fillText(
-    "Less",
-    width - canvasMargin - (boxWidth + boxMargin) * themeGrades - 55,
-    37
-  );
-  ctx.fillText("More", width - canvasMargin - 25, 37);
+  ctx.fillText('Less', width - canvasMargin - (boxWidth + boxMargin) * themeGrades - 55, 37);
+  ctx.fillText('More', width - canvasMargin - 25, 37);
+
   for (let x = 0; x < 5; x += 1) {
-    // @ts-ignore
     ctx.fillStyle = theme[`grade${x}`];
-    ctx.fillRect(
-      width - canvasMargin - (boxWidth + boxMargin) * themeGrades - 27,
-      textHeight + boxWidth,
-      10,
-      10
-    );
+    ctx.fillRect(width - canvasMargin - (boxWidth + boxMargin) * themeGrades - 27, textHeight + boxWidth, 10, 10);
     themeGrades -= 1;
   }
 
   ctx.fillStyle = theme.text;
-  ctx.textBaseline = "hanging";
+  ctx.textBaseline = 'hanging';
   ctx.font = `20px '${fontFace}'`;
   ctx.fillText(`@${username} on GitHub`, canvasMargin, canvasMargin);
 
-  let totalContributions = data.total;
+  const totalContributions = data.total;
 
   ctx.font = `10px '${fontFace}'`;
-  ctx.fillText(
-    `Total Contributions: ${totalContributions}`,
-    canvasMargin,
-    canvasMargin + 30
-  );
+  ctx.fillText(`Total Contributions: ${totalContributions}`, canvasMargin, canvasMargin + 30);
 
   ctx.beginPath();
   ctx.moveTo(canvasMargin, 55 + 10);
@@ -271,26 +244,26 @@ function drawMetaData(
   ctx.stroke();
 }
 
-export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
+export function drawContributions(canvas: HTMLCanvasElement, opts: Options, setContributionGrid: Dispatch<number[][]>) {
   const { data } = opts;
   let headerOffset = 0;
   if (!opts.skipHeader) {
     headerOffset = headerHeight;
   }
   const height = yearHeight + canvasMargin + headerOffset;
-  const width = 53 * (boxWidth + boxMargin) + canvasMargin * 2;
+  const width = 52 * (boxWidth + boxMargin) + canvasMargin * 2;
 
   canvas.width = width * scaleFactor;
   canvas.height = height * scaleFactor;
 
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
 
   if (!ctx) {
-    throw new Error("Could not get 2d context from Canvas");
+    throw new Error('Could not get 2d context from Canvas');
   }
 
   ctx.scale(scaleFactor, scaleFactor);
-  ctx.textBaseline = "hanging";
+  ctx.textBaseline = 'hanging';
   if (!opts.skipHeader) {
     drawMetaData(ctx, {
       ...opts,
@@ -303,10 +276,47 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
   const offsetY = canvasMargin;
   const offsetX = canvasMargin;
 
-  drawYear(ctx, {
+  const contributionGrid = drawYear(ctx, {
     ...opts,
     offsetX,
     offsetY,
     data
   });
+
+  setContributionGrid(contributionGrid);
+}
+
+export function drawSelectedContributions(canvas: HTMLCanvasElement, contributions: number[][]) {
+  const theme = themes['githubDark'];
+
+  const height = yearHeight + canvasMargin;
+  const width = 10 * (boxWidth + boxMargin) + canvasMargin * 2;
+
+  canvas.width = width * scaleFactor;
+  canvas.height = height * scaleFactor;
+
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error('Could not get 2d context from Canvas');
+  }
+
+  ctx.scale(scaleFactor, scaleFactor);
+  ctx.textBaseline = 'hanging';
+
+  const graph = contributions;
+
+  // 7
+  for (let y = 0; y < graph.length; y += 1) {
+    // 10
+    for (let x = 0; x < graph[y].length; x += 1) {
+      const intensity = graph[y][x];
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const color = theme[`grade${intensity}`];
+      ctx.fillStyle = color;
+      ctx.fillRect((boxWidth + boxMargin) * x, textHeight + (boxWidth + boxMargin) * y, 10, 10);
+    }
+  }
 }
