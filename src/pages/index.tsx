@@ -29,6 +29,7 @@ import {
 } from '../utils/drawContributions';
 
 import { countPieces } from '../utils/generateTetrisPieces';
+import Tetris from '../components/Tetris';
 
 const marks = Array.from({ length: 52 })
   .map((a, i) => {
@@ -45,7 +46,7 @@ export default function Home() {
 
   const [year, setYear] = useState(`${new Date().getFullYear()}`);
   const [loading, setLoading] = useState(false);
-  const [userError] = useState(false);
+  const [userError, setUserError] = useState('');
   const [data, setData] = useState<DataStruct>();
   const [sliderValue, setSliderValue] = useState(0);
 
@@ -56,6 +57,8 @@ export default function Home() {
 
   const [preGameMode, setPreGameMode] = useState(false);
   const [preGameLoading, setPreGameLoading] = useState(true);
+
+  const isUserError = userError.replace(/\s/g, '').length !== 0;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const selectedContributionRef = useRef<HTMLCanvasElement>(null);
@@ -82,7 +85,13 @@ export default function Home() {
     axios
       .get('/api/test')
       .then((res) => {
-        setData(res.data);
+        if (res.data) {
+          setData(res.data);
+          console.log(res.data);
+        }
+
+        if (!res.data) setUserError('Sorry, could not find your profile');
+
         setLoading(false);
       })
       .catch((error) => {
@@ -195,7 +204,7 @@ export default function Home() {
             variant='outlined'
             placeholder='username'
             name='gh_username'
-            error={userError}
+            error={isUserError}
             sx={{
               '& .MuiOutlinedInput-root': {
                 color: 'inherit',
@@ -296,9 +305,9 @@ export default function Home() {
           />
         </Box>
 
-        {userError && (
+        {isUserError && (
           <Typography variant='body2' color='error' mt={2}>
-            Sorry, user not found on github
+            {userError}
           </Typography>
         )}
       </>
@@ -308,7 +317,7 @@ export default function Home() {
   if (!preGameLoading && preGameMode && tetrisPieces) {
     return (
       <>
-        <canvas ref={selectedContributionRef} />
+        {/* <canvas ref={selectedContributionRef} />
 
         <Box mt={1}>
           <Typography>Number of Pieces</Typography>
@@ -316,7 +325,9 @@ export default function Home() {
           {Object.keys(tetrisPieces).map((piece) => (
             <Typography variant='subtitle2' my={0.5} key={piece}>{`Piece ${piece}: ${tetrisPieces[piece]}`}</Typography>
           ))}
-        </Box>
+        </Box> */}
+
+        <Tetris />
       </>
     );
   }

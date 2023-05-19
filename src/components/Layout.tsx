@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
-import { Box, Container } from "@mui/material";
-import Footer from "./Footer";
+import { ReactNode } from 'react';
+import { Box, Container } from '@mui/material';
+import Footer from './Footer';
 
 interface Props {
   children: ReactNode;
@@ -12,25 +12,24 @@ const Layout = (props: Props) => {
   return (
     <main>
       <Container
-        maxWidth="xl"
+        maxWidth='xl'
         sx={{
-          minHeight: "100vh",
-          backgroundImage:
-            "radial-gradient(50% 100%, rgba(0, 56, 32, 0.45) 0, #00040B 75%)",
+          minHeight: '100vh',
+          backgroundImage: 'radial-gradient(50% 100%, rgba(0, 56, 32, 0.45) 0, #00040B 75%)',
 
           a: {
-            textDecoration: "none",
-          },
+            textDecoration: 'none'
+          }
         }}
       >
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            minHeight: "calc(100vh - 36px)",
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            minHeight: 'calc(100vh - 36px)'
           }}
         >
           {children}

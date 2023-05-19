@@ -1,31 +1,30 @@
-import { Poppins } from "next/font/google";
-import { createTheme } from "@mui/material/styles";
-import { red } from "@mui/material/colors";
+import { Poppins } from 'next/font/google';
+import { createTheme } from '@mui/material/styles';
 
 export const poppins = Poppins({
-  weight: ["300", "400", "500", "700"],
-  subsets: ["latin"],
-  display: "swap",
-  fallback: ["Helvetica", "Arial", "sans-serif"],
+  weight: ['300', '400', '500', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['Helvetica', 'Arial', 'sans-serif']
 });
 
 // Create a theme instance.
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#005f2c",
-      contrastText: "#fff"
+      main: '#005f2c',
+      contrastText: '#fff'
     },
     secondary: {
-      main: "#09241b",
-      contrastText: "#fff"
+      main: '#09241b',
+      contrastText: '#fff'
     },
     error: {
-      main: '#eb2945',
+      main: '#eb2945'
     },
     background: {
-      default: "#00040B",
-    },
+      default: '#00040B'
+    }
   },
 
   typography: {
@@ -33,9 +32,23 @@ const theme = createTheme({
     allVariants: {
       color: '#fff'
     },
-     button: {
+    button: {
       textTransform: 'capitalize'
-     }
+    }
+  },
+
+  components: {
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          background: '#101217',
+          display: 'flex',
+          placeItems: 'center',
+          gap: '8px',
+          padding: '15px 20px'
+        }
+      }
+    }
   }
 });
 

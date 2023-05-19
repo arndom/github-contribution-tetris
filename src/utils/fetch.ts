@@ -76,7 +76,12 @@ async function fetchDataForYear(url: string, year: number) {
 
 export async function fetchData(username: string, year: number) {
   const years = await fetchYears(username);
-  const selectedYear = years.filter((y) => Number(y.text) === year)[0];
 
-  return fetchDataForYear(String(selectedYear.href), Number(selectedYear.text));
+  if (years.length > 0) {
+    const selectedYear = years.filter((y) => Number(y.text) === year)[0];
+
+    return fetchDataForYear(String(selectedYear.href), Number(selectedYear.text));
+  }
+
+  return null;
 }
