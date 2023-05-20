@@ -1,4 +1,5 @@
 import cheerio from 'cheerio';
+import { DataStruct } from './drawContributions';
 
 // github_dark
 const COLOR_MAP = {
@@ -74,13 +75,21 @@ async function fetchDataForYear(url: string, year: number) {
   };
 }
 
+export async function checkUserExists(username: string) {
+  const years = await fetchYears(username);
+
+  if (years.length > 0) return true;
+
+  return false;
+}
+
 export async function fetchData(username: string, year: number) {
   const years = await fetchYears(username);
 
   if (years.length > 0) {
     const selectedYear = years.filter((y) => Number(y.text) === year)[0];
 
-    return fetchDataForYear(String(selectedYear.href), Number(selectedYear.text));
+    return fetchDataForYear(String(selectedYear.href), Number(selectedYear.text)) as unknown as DataStruct;
   }
 
   return null;

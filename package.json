@@ -21,6 +21,7 @@
     "date-fns": "^2.30.0",
     "lodash": "^4.17.21",
     "next": "latest",
+    "nprogress": "^0.2.0",
     "react": "latest",
     "react-dom": "latest"
   },
@@ -28,6 +29,7 @@
     "@types/cheerio": "^0.22.31",
     "@types/lodash": "^4.14.194",
     "@types/node": "latest",
+    "@types/nprogress": "^0.2.0",
     "@types/prop-types": "^15.7.5",
     "@types/react": "latest",
     "@typescript-eslint/eslint-plugin": "^5.59.6",

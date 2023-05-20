@@ -2,8 +2,6 @@
 
 import { addWeeks, format, getMonth, isAfter, isBefore, parseISO, setDay, startOfWeek } from 'date-fns';
 
-import { Dispatch } from 'react';
-
 const themes = {
   standard: {
     background: '#ffffff',
@@ -244,7 +242,7 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   ctx.stroke();
 }
 
-export function drawContributions(canvas: HTMLCanvasElement, opts: Options, setContributionGrid: Dispatch<number[][]>) {
+export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
   const { data } = opts;
   let headerOffset = 0;
   if (!opts.skipHeader) {
@@ -283,13 +281,13 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options, setC
     data
   });
 
-  setContributionGrid(contributionGrid);
+  return contributionGrid;
 }
 
 export function drawSelectedContributions(canvas: HTMLCanvasElement, contributions: number[][]) {
   const theme = themes['githubDark'];
 
-  const height = yearHeight + canvasMargin;
+  const height = yearHeight - textHeight + canvasMargin;
   const width = 10 * (boxWidth + boxMargin) + canvasMargin * 2;
 
   canvas.width = width * scaleFactor;
@@ -316,7 +314,7 @@ export function drawSelectedContributions(canvas: HTMLCanvasElement, contributio
       // @ts-ignore
       const color = theme[`grade${intensity}`];
       ctx.fillStyle = color;
-      ctx.fillRect((boxWidth + boxMargin) * x, textHeight + (boxWidth + boxMargin) * y, 10, 10);
+      ctx.fillRect((boxWidth + boxMargin) * x, (boxWidth + boxMargin) * y, 10, 10);
     }
   }
 }
