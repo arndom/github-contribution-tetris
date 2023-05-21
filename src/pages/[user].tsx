@@ -1,5 +1,16 @@
 import { useRef, useState, useEffect } from 'react';
-import { Typography, Box, Button, useTheme, Backdrop, CircularProgress, Slider, IconButton } from '@mui/material';
+import {
+  Typography,
+  Box,
+  Button,
+  useTheme,
+  Backdrop,
+  CircularProgress,
+  Slider,
+  IconButton,
+  Link,
+  keyframes
+} from '@mui/material';
 import {
   DataStruct,
   boxMargin,
@@ -16,6 +27,24 @@ import { fetchData } from '../utils/fetch';
 import { ArrowForward, ArrowBack } from '@mui/icons-material';
 import { countPieces } from '../utils/generateTetrisPieces';
 import Tetris from '../components/Tetris';
+import Image from 'next/image';
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    visibility: hidden;
+  }
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+`;
+
+const styles = {
+  fadeStyle: {
+    animation: `${fadeIn} 1s ease-in-out`
+  }
+};
 
 const marks = Array.from({ length: 52 })
   .map((a, i) => {
@@ -28,6 +57,7 @@ const marks = Array.from({ length: 52 })
   .filter((a) => a !== undefined);
 
 const steps = ['GRAPH', 'EXTRACTED', 'GAME'];
+const PIECES = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
 
 const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const theme = useTheme();
@@ -43,6 +73,7 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
   const [selectedContributions, setSelectedContributions] = useState<number[][]>([]);
   const [extractedSelectedContributions, setExtractedSelectedContributions] = useState<number[][]>([]);
   const [tetrisPieces, setTetrisPieces] = useState<Record<string, number>>();
+  const [showExtracted, setShowExtracted] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(0);
   const incrementStep = () => setCurrentStep((prev) => ++prev);
@@ -55,6 +86,11 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
     setSliderValue(newValue as number);
   };
+
+  const convertTetrisPiecesToArrayPieces = (obj: {
+    [key: string]: number;
+  }): ('I' | 'J' | 'L' | 'O' | 'S' | 'T' | 'Z')[] =>
+    Object.entries(obj).flatMap(([key, value]) => Array(value).fill(key));
 
   // get contribution data
   useEffect(() => {
@@ -77,6 +113,8 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
   // generate selected contribution data
   useEffect(() => {
     if (contributionGrid.length > 0) {
+      setShowExtracted(false);
+
       const getSelectedContribution = async () => {
         const startPoint = marks.findIndex((i) => i?.value === sliderValue);
         const endPoint = startPoint + 10;
@@ -114,11 +152,31 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
       currentStep === 1
     ) {
       drawSelectedContributions(selectedContributionRef.current, selectedContributions);
-      drawSelectedContributions(extractedSelectedContributionRef.current, extractedSelectedContributions);
+      drawSelectedContributions(extractedSelectedContributionRef.current, selectedContributions);
+
+      setTimeout(() => {
+        extractedSelectedContributionRef.current &&
+          drawSelectedContributions(extractedSelectedContributionRef.current, extractedSelectedContributions);
+      }, 1800);
+
+      setTimeout(() => {
+        setShowExtracted(true);
+      }, 2000);
     }
   }, [selectedContributions, extractedSelectedContributions, currentStep, tetrisPieces]);
 
-  if (!data) return <>User not found, go home</>;
+  if (!data) {
+    return (
+      <Typography
+        component={Link}
+        href='/'
+        color='primary'
+        sx={{ textDecoration: 'underline !important', fontSize: '1.25rem' }}
+      >
+        User not found. Go home
+      </Typography>
+    );
+  }
 
   return (
     <>
@@ -174,21 +232,35 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
             <canvas ref={extractedSelectedContributionRef} />
           </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column ' }}>
-            <Typography variant='overline'>Extracted Pieces</Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-              {Object.keys(tetrisPieces).map((piece) => (
-                <Typography variant='h6' color='primary' key={piece} sx={{ fontFamily: 'monospace', flexBasis: '33%' }}>
-                  {piece}
-                  <sub style={{ color: 'grey' }}>{tetrisPieces[piece]}</sub>
-                </Typography>
-              ))}
+          {showExtracted && (
+            <Box sx={[{ display: 'flex', flexDirection: 'column' }, showExtracted && styles.fadeStyle]}>
+              <Typography variant='overline'>Extracted Pieces</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
+                {PIECES.map((piece) => (
+                  <Box
+                    key={piece}
+                    sx={{
+                      fontFamily: 'monospace',
+                      flexBasis: '30%',
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'center',
+                      gap: 0.5
+                    }}
+                  >
+                    <Image src={`/img/${piece.toLowerCase()}.svg`} width={30} height={30} alt={`piece-${piece}`} />
+                    <sub style={{ color: 'grey' }}>x{tetrisPieces[piece]}</sub>
+                  </Box>
+                ))}
+              </Box>
             </Box>
-          </Box>
+          )}
         </Box>
       )}
 
-      {steps[currentStep] === steps[2] && <Tetris />}
+      {steps[currentStep] === steps[2] && tetrisPieces && (
+        <Tetris initialQueue={convertTetrisPiecesToArrayPieces(tetrisPieces)} />
+      )}
 
       {currentStep === 0 && (
         <Typography variant='body1' color='grey'>
@@ -223,9 +295,23 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
       )}
 
       {steps[currentStep] === steps[1] && (
-        <Button onClick={incrementStep} variant='contained'>
-          Play Game
-        </Button>
+        <>
+          {!showExtracted && (
+            <CircularProgress
+              size={20}
+              sx={{
+                mt: -1.75,
+                mb: 1.5,
+                color: 'rgba(39, 213, 69, 0.75)',
+                filter: 'drop-shadow(0 0 .3rem #ffffff70)'
+              }}
+            />
+          )}
+
+          <Button onClick={incrementStep} variant='contained'>
+            Play Game
+          </Button>
+        </>
       )}
 
       <Backdrop

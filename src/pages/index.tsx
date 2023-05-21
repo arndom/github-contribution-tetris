@@ -23,6 +23,7 @@ export default function Home() {
   const [year, setYear] = useState(`${new Date().getFullYear()}`);
   const [loading, setLoading] = useState(false);
   const [userError, setUserError] = useState('');
+  const [user, setUser] = useState('');
 
   const isUserError = userError.replace(/\s/g, '').length !== 0;
 
@@ -42,19 +43,22 @@ export default function Home() {
     setYear(event.target.value);
   };
 
-  const handleLoading2 = () => {
+  const handleSubmit = () => {
+    setUserError('');
     setLoading(true);
 
     axios
-      .get('/api/check')
+      .get(`/api/check?user=${user}`)
       .then((res) => {
-        if (res.data) router.push('/arndom?year=2022');
+        if (res.data) router.push(`/${user}?year=${year}`);
         if (!res.data) setUserError('Sorry, could not find your profile');
 
         setLoading(false);
       })
       .catch((error) => {
+        console.log('failed to fetch');
         console.log(error);
+        setUserError('Sorry, an error occured, check console');
         setLoading(false);
       });
   };
@@ -87,6 +91,8 @@ export default function Home() {
         }}
       >
         <TextField
+          value={user}
+          onChange={(e) => setUser(String(e.target.value).replace(/\s/g, ''))}
           variant='outlined'
           placeholder='username'
           name='gh_username'
@@ -167,7 +173,8 @@ export default function Home() {
 
                 {!loading && (
                   <Button
-                    onClick={handleLoading2}
+                    disabled={user.replace(/\s/g, '').length === 0}
+                    onClick={handleSubmit}
                     sx={{
                       borderRadius: '8px',
                       boxShadow: 'none'

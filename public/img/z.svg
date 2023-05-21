@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="100 100 300 200" xmlns="http://www.w3.org/2000/svg">
+  <rect x="100" width="100" height="100" style="stroke: rgb(0, 0, 0); fill: rgb(16, 152, 61);" y="100"/>
+  <rect x="200" width="100" height="100" style="stroke: rgb(0, 0, 0); fill: rgb(16, 152, 61);" y="100"/>
+  <rect x="200" width="100" height="100" style="stroke: rgb(0, 0, 0); fill: rgb(16, 152, 61);" y="200"/>
+  <rect x="300" width="100" height="100" style="stroke: rgb(0, 0, 0); fill: rgb(16, 152, 61);" y="200"/>
+</svg>

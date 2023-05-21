@@ -5,6 +5,7 @@ import PieceQueue from './PieceQueue';
 import { Context } from '../context';
 import { KeyboardMap, useKeyboardControls } from '../hooks/useKeyboardControls';
 import { useEffect, useMemo, useReducer } from 'react';
+import { Piece } from '../models/Piece';
 
 export type RenderFn = (params: {
   HeldPiece: React.ComponentType;
@@ -32,6 +33,7 @@ export type Controller = {
 
 type Props = {
   keyboardControls?: KeyboardMap;
+  initialQueue?: Piece[];
   children: RenderFn;
 };
 
@@ -56,7 +58,8 @@ const defaultKeyboardMap: KeyboardMap = {
 const tickSeconds = (level: number) => (0.8 - (level - 1) * 0.007) ** (level - 1);
 
 export default function Tetris(props: Props): JSX.Element {
-  const [game, dispatch] = useReducer(Game.update, Game.init());
+  const gameInit = props.initialQueue ? Game.init(props.initialQueue) : Game.init();
+  const [game, dispatch] = useReducer(Game.update, gameInit);
   const keyboardMap = props.keyboardControls ?? defaultKeyboardMap;
 
   useKeyboardControls(keyboardMap, dispatch);

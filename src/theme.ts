@@ -48,6 +48,16 @@ const theme = createTheme({
           padding: '15px 20px'
         }
       }
+    },
+
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          '&.Mui-disabled': {
+            color: 'rgba(255, 255, 255, 0.26)'
+          }
+        }
+      }
     }
   }
 });

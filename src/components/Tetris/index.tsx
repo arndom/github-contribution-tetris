@@ -1,10 +1,15 @@
 import { Box } from '@mui/material';
 import GamePanel from './GamePanel';
+import { Piece } from '../../modules/react-tetris/models/Piece';
 
-const Tetris = () => {
+interface Props {
+  initialQueue: Piece[];
+}
+
+const Tetris = (props: Props) => {
   return (
     <Box sx={styles.root}>
-      <GamePanel />
+      <GamePanel initialQueue={props.initialQueue} />
     </Box>
   );
 };

@@ -170,8 +170,8 @@ const applyMove = (move: (matrix: Matrix, piece: PositionedPiece) => PositionedP
   return afterFlip ? { ...game, piece: afterFlip } : game;
 };
 
-export const init = (): Game => {
-  const queue = PieceQueue.create(5, ['I', 'O']); // array is queue of github passed
+export const init = (q?: Piece[]): Game => {
+  const queue = q ? PieceQueue.create(5, q) : PieceQueue.create(5); // array is queue of github passed
   const next = PieceQueue.getNext(queue);
 
   return {
