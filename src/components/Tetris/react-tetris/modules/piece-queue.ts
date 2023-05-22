@@ -68,8 +68,6 @@ function pullFromBucket(bucket: Piece[]): [Piece, Piece[]] {
     throw new Error(`Unexpected: failed to pull from bucket`);
   }
 
-  // console.log([randomPiece, local]);
-
   return [randomPiece, local];
 }
 

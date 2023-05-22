@@ -1,15 +1,16 @@
+import { useState } from 'react';
 import { Button, Box, Dialog, Typography, useTheme } from '@mui/material';
 
-import Tetris from '../../modules/react-tetris/components/Tetris';
-import Controller from './Controller';
+// import Controller from './Controller';
+import Tetris from './react-tetris/components/Tetris';
+
 import {
   ArrowDropDown,
   KeyboardArrowDownOutlined,
   KeyboardArrowLeftOutlined,
   KeyboardArrowRightOutlined
 } from '@mui/icons-material';
-import { Piece } from '../../modules/react-tetris/models/Piece';
-import { useEffect, useState } from 'react';
+import { Piece } from './react-tetris/models/Piece';
 
 type Props = {
   initialQueue?: Piece[];
@@ -67,20 +68,6 @@ const GamePanel = (props: Props): JSX.Element => {
 
   const theme = useTheme();
   const [isNewGame, setIsNewGame] = useState(true);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLocaleLowerCase() === 'r') {
-        setIsNewGame(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
 
   return (
     <Box sx={styles.container}>
@@ -146,6 +133,7 @@ const GamePanel = (props: Props): JSX.Element => {
                 ))}
               </Box>
 
+              {/* TODO: find a way to handle keyboard click restart without interuptting process */}
               {initialQueue && isNewGame && (
                 <Box sx={{ display: 'grid', placeItems: 'center' }}>
                   <Typography variant='subtitle2' sx={{ fontSize: '0.75rem' }} color='grey' mt={2}>
@@ -169,7 +157,7 @@ const GamePanel = (props: Props): JSX.Element => {
 
               {/* TODO: add mobile/tab */}
               {/* Temp disabled */}
-              <Controller controller={controller} />
+              {/* <Controller controller={controller} /> */}
             </Box>
 
             <Dialog open={state === 'PAUSED'}>

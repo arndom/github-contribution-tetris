@@ -46,6 +46,33 @@ export type Action =
   | 'FLIP_COUNTERCLOCKWISE'
   | 'RESTART';
 
+const initialPosition = {
+  x: Math.round(Constants.GAME_WIDTH / 2) - Constants.BLOCK_WIDTH / 2,
+  y: 0
+};
+
+const initializePiece = (piece: Piece): PositionedPiece => {
+  return {
+    position: initialPosition,
+    piece,
+    rotation: 0
+  };
+};
+
+export const init = (q?: Piece[]): Game => {
+  const queue = q ? PieceQueue.create(5, q) : PieceQueue.create(5); // array is queue of github passed
+  const next = PieceQueue.getNext(queue);
+
+  return {
+    state: 'PLAYING',
+    points: 0,
+    lines: 0,
+    matrix: buildMatrix(),
+    piece: initializePiece(next.piece),
+    heldPiece: undefined,
+    queue: next.queue
+  };
+};
 export const update = (game: Game, action: Action): Game => {
   switch (action) {
     case 'RESTART': {
@@ -150,39 +177,11 @@ const addScore = (additionalLines: number) => {
   }
 };
 
-const initialPosition = {
-  x: Math.round(Constants.GAME_WIDTH / 2) - Constants.BLOCK_WIDTH / 2,
-  y: 0
-};
-
-const initializePiece = (piece: Piece): PositionedPiece => {
-  return {
-    position: initialPosition,
-    piece,
-    rotation: 0
-  };
-};
-
 const applyMove = (move: (matrix: Matrix, piece: PositionedPiece) => PositionedPiece | undefined, game: Game): Game => {
   if (game.state !== 'PLAYING') return game;
   const afterFlip = move(game.matrix, game.piece);
 
   return afterFlip ? { ...game, piece: afterFlip } : game;
-};
-
-export const init = (q?: Piece[]): Game => {
-  const queue = q ? PieceQueue.create(5, q) : PieceQueue.create(5); // array is queue of github passed
-  const next = PieceQueue.getNext(queue);
-
-  return {
-    state: 'PLAYING',
-    points: 0,
-    lines: 0,
-    matrix: buildMatrix(),
-    piece: initializePiece(next.piece),
-    heldPiece: undefined,
-    queue: next.queue
-  };
 };
 
 // Good display of merging piece + matrix

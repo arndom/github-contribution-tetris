@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Controller } from '../../modules/react-tetris/components/Tetris';
+import type { Controller } from './react-tetris/components/Tetris';
 import { Box } from '@mui/material';
 
 type Props = {

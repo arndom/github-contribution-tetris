@@ -41,8 +41,11 @@ export default function MyApp(props: MyAppProps) {
   return (
     <CacheProvider value={emotionCache}>
       <Head>
+        <title>GH Tetris</title>
+        <meta name='description' content='GH Tetris - Generated game of tetris from your github contributions' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
+
       <ThemeProvider theme={theme}>
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />

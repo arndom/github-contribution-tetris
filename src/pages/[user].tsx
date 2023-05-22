@@ -1,50 +1,22 @@
 import { useRef, useState, useEffect } from 'react';
-import {
-  Typography,
-  Box,
-  Button,
-  useTheme,
-  Backdrop,
-  CircularProgress,
-  Slider,
-  IconButton,
-  Link,
-  keyframes
-} from '@mui/material';
+import { Typography, Box, Button, Backdrop, CircularProgress, Link } from '@mui/material';
+
+import { useRouter } from 'next/router';
+import axios from 'axios';
+
 import {
   DataStruct,
   boxMargin,
   boxWidth,
-  canvasMargin,
   drawContributions,
   drawSelectedContributions,
-  scaleFactor,
-  textHeight,
-  yearHeight
+  scaleFactor
 } from '../utils/drawContributions';
-import { GetServerSideProps, GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
-import { fetchData } from '../utils/fetch';
-import { ArrowForward, ArrowBack } from '@mui/icons-material';
 import { countPieces } from '../utils/generateTetrisPieces';
-import Tetris from '../components/Tetris';
-import Image from 'next/image';
 
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    visibility: hidden;
-  }
-  to {
-    opacity: 1;
-    visibility: visible;
-  }
-`;
-
-const styles = {
-  fadeStyle: {
-    animation: `${fadeIn} 1s ease-in-out`
-  }
-};
+import Step1 from '../components/steps/Step1';
+import Step2 from '../components/steps/Step2';
+import Step3 from '../components/steps/Step3';
 
 const marks = Array.from({ length: 52 })
   .map((a, i) => {
@@ -57,10 +29,13 @@ const marks = Array.from({ length: 52 })
   .filter((a) => a !== undefined);
 
 const steps = ['GRAPH', 'EXTRACTED', 'GAME'];
-const PIECES = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
+const pieces = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
 
-const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const theme = useTheme();
+// TODO: hotfix -> refactor to CSR to fix 504 error
+const User = () => {
+  const [data, setData] = useState<DataStruct | null>();
+  const router = useRouter();
+  const { user, year } = router.query;
 
   const contributionRef = useRef<HTMLCanvasElement>(null);
   const selectedContributionRef = useRef<HTMLCanvasElement>(null);
@@ -74,23 +49,33 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
   const [extractedSelectedContributions, setExtractedSelectedContributions] = useState<number[][]>([]);
   const [tetrisPieces, setTetrisPieces] = useState<Record<string, number>>();
   const [showExtracted, setShowExtracted] = useState(false);
+  const [initLoading, setInitLoading] = useState(true);
 
   const [currentStep, setCurrentStep] = useState(0);
   const incrementStep = () => setCurrentStep((prev) => ++prev);
   const decrementStep = () => setCurrentStep((prev) => --prev);
 
-  const disableStepDecrement = currentStep === 0;
-  const disableStepIncrement = currentStep === 1;
-  const disableStepUpdates = currentStep === 2;
-
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
     setSliderValue(newValue as number);
   };
 
-  const convertTetrisPiecesToArrayPieces = (obj: {
-    [key: string]: number;
-  }): ('I' | 'J' | 'L' | 'O' | 'S' | 'T' | 'Z')[] =>
-    Object.entries(obj).flatMap(([key, value]) => Array(value).fill(key));
+  // init data
+  useEffect(() => {
+    if (user && year) {
+      (async () => {
+        await axios
+          .get(`/api/contributions?user=${user}&year=${year}`)
+          .then((res) => {
+            setData(res.data);
+            setInitLoading(false);
+          })
+          .catch((error) => {
+            console.log(error);
+            setInitLoading(false);
+          });
+      })();
+    }
+  }, [user, year]);
 
   // get contribution data
   useEffect(() => {
@@ -104,8 +89,9 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
 
       setContributionGrid(c);
     }
-  }, [data, user, contributionRef, setLoading, currentStep]);
+  }, [data, user, contributionRef, currentStep]);
 
+  // loading for contribution slider
   useEffect(() => {
     if (contributionGrid.length > 0) setLoading(false);
   }, [contributionGrid.length]);
@@ -161,11 +147,30 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
 
       setTimeout(() => {
         setShowExtracted(true);
-      }, 2000);
+      }, 2500);
     }
   }, [selectedContributions, extractedSelectedContributions, currentStep, tetrisPieces]);
 
-  if (!data) {
+  if (initLoading) {
+    return (
+      <Backdrop
+        open={initLoading}
+        sx={{
+          zIndex: 5,
+          position: 'absolute'
+        }}
+      >
+        <CircularProgress
+          sx={{
+            color: 'rgba(39, 213, 69, 0.75)',
+            filter: 'drop-shadow(0 0 .3rem #ffffff70)'
+          }}
+        />
+      </Backdrop>
+    );
+  }
+
+  if (data === null && !initLoading) {
     return (
       <Typography
         component={Link}
@@ -180,87 +185,13 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
 
   return (
     <>
-      {steps[currentStep] === steps[0] && (
-        <Box>
-          <canvas ref={contributionRef} />
-
-          {!loading && (
-            <Slider
-              size='small'
-              value={sliderValue}
-              onChange={handleSliderChange}
-              valueLabelDisplay='on'
-              sx={{
-                mt: -1,
-                '& .MuiSlider-valueLabel': {
-                  width: `${(10 * (boxWidth + boxMargin) + canvasMargin * 4) * scaleFactor}px`,
-
-                  '&.MuiSlider-valueLabelOpen': {
-                    transform: 'scale(1) translateY(-100%) translateX(50%)',
-                    height: (yearHeight - textHeight + canvasMargin) * scaleFactor
-                  },
-
-                  background: 'transparent',
-                  border: `1px solid ${theme.palette.primary.main}`,
-                  borderWidth: boxMargin,
-                  top: '-8px',
-                  padding: 0,
-
-                  '&::before, .MuiSlider-valueLabelLabel': {
-                    display: 'none'
-                  }
-                }
-              }}
-              min={0}
-              max={(52 * (boxWidth + boxMargin) + canvasMargin * 4) * scaleFactor}
-              step={null}
-              marks={marks as { value: number }[]}
-            />
-          )}
-        </Box>
-      )}
-
+      {steps[currentStep] === steps[0] && <Step1 {...{ loading, contributionRef, sliderValue, handleSliderChange }} />}
       {steps[currentStep] === steps[1] && tetrisPieces && (
-        <Box sx={{ display: 'flex', gap: 5 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column ' }}>
-            <Typography variant='overline'>Selected Contributions</Typography>
-            <canvas ref={selectedContributionRef} />
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column ' }}>
-            <Typography variant='overline'>Extracted Contributions</Typography>
-            <canvas ref={extractedSelectedContributionRef} />
-          </Box>
-
-          {showExtracted && (
-            <Box sx={[{ display: 'flex', flexDirection: 'column' }, showExtracted && styles.fadeStyle]}>
-              <Typography variant='overline'>Extracted Pieces</Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
-                {PIECES.map((piece) => (
-                  <Box
-                    key={piece}
-                    sx={{
-                      fontFamily: 'monospace',
-                      flexBasis: '30%',
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      justifyContent: 'center',
-                      gap: 0.5
-                    }}
-                  >
-                    <Image src={`/img/${piece.toLowerCase()}.svg`} width={30} height={30} alt={`piece-${piece}`} />
-                    <sub style={{ color: 'grey' }}>x{tetrisPieces[piece]}</sub>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          )}
-        </Box>
+        <Step2
+          {...{ selectedContributionRef, extractedSelectedContributionRef, showExtracted, pieces, tetrisPieces }}
+        />
       )}
-
-      {steps[currentStep] === steps[2] && tetrisPieces && (
-        <Tetris initialQueue={convertTetrisPiecesToArrayPieces(tetrisPieces)} />
-      )}
+      {steps[currentStep] === steps[2] && tetrisPieces && <Step3 {...{ tetrisPieces }} />}
 
       {currentStep === 0 && (
         <Typography variant='body1' color='grey'>
@@ -268,29 +199,15 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
         </Typography>
       )}
 
-      {!disableStepUpdates && (
+      {!(currentStep === 2) && (
         <Box my={1.75} sx={{ display: 'flex' }}>
-          <IconButton onClick={decrementStep} sx={{ p: 0 }} disabled={disableStepDecrement}>
-            <ArrowBack
-              sx={{
-                width: '1.15em',
-                height: '1.15em',
-                fill: disableStepDecrement ? 'grey' : 'rgba(39, 213, 69, 0.75)',
-                transform: disableStepDecrement ? 'scale(0.65)' : 'scale(1)'
-              }}
-            />
-          </IconButton>
+          <Button onClick={decrementStep} sx={{ p: 0 }} disabled={currentStep === 0}>
+            Prev
+          </Button>
 
-          <IconButton onClick={incrementStep} sx={{ p: 0 }} disabled={disableStepIncrement}>
-            <ArrowForward
-              sx={{
-                width: '1.15em',
-                height: '1.15em',
-                fill: disableStepIncrement ? 'grey' : 'rgba(39, 213, 69, 0.75)',
-                transform: disableStepIncrement ? 'scale(0.65)' : 'scale(1)'
-              }}
-            />
-          </IconButton>
+          <Button onClick={incrementStep} sx={{ p: 0 }} disabled={currentStep === 1}>
+            Next
+          </Button>
         </Box>
       )}
 
@@ -308,38 +225,13 @@ const User = ({ data, user }: InferGetServerSidePropsType<typeof getServerSidePr
             />
           )}
 
-          <Button onClick={incrementStep} variant='contained'>
+          <Button onClick={incrementStep} disabled={!showExtracted} variant='contained'>
             Play Game
           </Button>
         </>
       )}
-
-      <Backdrop
-        open={loading}
-        sx={{
-          zIndex: 5,
-          position: 'absolute'
-        }}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
     </>
   );
-};
-
-export const getServerSideProps: GetServerSideProps<{
-  data: DataStruct | null;
-  user: string;
-}> = async (context: GetServerSidePropsContext) => {
-  const { query, res } = context;
-  const user = String(query['user']);
-  const year = Number(query['year']);
-
-  const data = await fetchData(user, year);
-
-  res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
-
-  return { props: { data, user } };
 };
 
 export default User;

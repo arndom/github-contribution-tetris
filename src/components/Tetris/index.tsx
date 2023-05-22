@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import GamePanel from './GamePanel';
-import { Piece } from '../../modules/react-tetris/models/Piece';
+import { Piece } from './react-tetris/models/Piece';
 
 interface Props {
   initialQueue: Piece[];
