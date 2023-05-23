@@ -26,7 +26,7 @@ export default function Footer() {
       <Typography
         variant='caption'
         component='a'
-        href='https://github.com/arndom'
+        href='https://github.com/arndom/github-contribution-tetris'
         target='_blank'
         sx={{
           filter: 'grayscale(1)'
