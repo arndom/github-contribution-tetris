@@ -5,10 +5,10 @@ import { Button, Box, Dialog, Typography, useTheme } from '@mui/material';
 import Tetris from './react-tetris/components/Tetris';
 
 import {
-  ArrowDropDown,
   KeyboardArrowDownOutlined,
   KeyboardArrowLeftOutlined,
-  KeyboardArrowRightOutlined
+  KeyboardArrowRightOutlined,
+  KeyboardArrowUpOutlined
 } from '@mui/icons-material';
 import { Piece } from './react-tetris/models/Piece';
 
@@ -39,11 +39,26 @@ const keyMap = [
   },
   {
     text: 'rotate right',
-    component: <ArrowDropDown />
+    component: (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <KeyboardArrowUpOutlined />
+        <Typography variant='subtitle1' color='grey' fontWeight={700} sx={{ lineHeight: 0.75, fontSize: '0.6rem' }}>
+          or
+        </Typography>
+
+        <Typography variant='overline' color='primary' fontWeight={700} sx={{ lineHeight: 0.75, fontSize: '0.6rem' }}>
+          X
+        </Typography>
+      </Box>
+    )
   },
   {
     text: 'rotate left',
-    component: <ArrowDropDown />
+    component: (
+      <Typography variant='overline' color='primary' fontWeight={700} sx={{ lineHeight: 0.75, fontSize: '0.6rem' }}>
+        Z
+      </Typography>
+    )
   },
   {
     text: 'pause',
