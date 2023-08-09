@@ -42,8 +42,41 @@ export default function MyApp(props: MyAppProps) {
     <CacheProvider value={emotionCache}>
       <Head>
         <title>GH Tetris</title>
-        <meta name='description' content='GH Tetris - Generated game of tetris from your github contributions' />
+        <meta name='description' content='Generated game of tetris from your github contributions' />
+        <link rel='canonical' href='https://gh-tetris.vercel.app/' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
+        <meta name='theme-color' content='#00040B' />
+
+        <meta
+          name='keywords'
+          content='
+            github,
+            github contributions,
+            github contribution graph,
+            github contributions graph,
+            github contribution chart,
+            github contributions chart,
+            tetris,
+            hackathon,
+            vercel,
+            dev.to,
+            arndom
+          '
+        />
+
+        {/* <!-- Open Graph / Facebook --> */}
+        <meta property='og:type' content='website' />
+        <meta property='og:url' content='https://gh-tetris.vercel.app/' />
+        <meta property='og:title' content='GH Tetris' />
+        <meta property='og:description' content='Generated game of tetris from your github contributions' />
+        <meta property='og:image' content='%PUBLIC_URL%/banner.png' />
+
+        {/* <!-- Twitter --> */}
+        <meta property='twitter:card' content='summary_large_image' />
+        <meta property='twitter:url' content='https://gh-tetris.vercel.app/' />
+        <meta property='twitter:title' content='GH Tetris' />
+        <meta property='twitter:description' content='Generated game of tetris from your github contributions' />
+        <meta property='twitter:image' content='%PUBLIC_URL%/banner.png' />
       </Head>
 
       <ThemeProvider theme={theme}>
