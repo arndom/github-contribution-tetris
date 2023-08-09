@@ -16,6 +16,7 @@ const Layout = (props: Props) => {
         sx={{
           minHeight: '100vh',
           backgroundImage: 'radial-gradient(50% 100%, rgba(0, 56, 32, 0.45) 0, #00040B 75%)',
+          px: { xs: 4, md: 2 },
 
           a: {
             textDecoration: 'none'

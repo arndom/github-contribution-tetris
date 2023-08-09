@@ -1,12 +1,16 @@
-import { Box, Slider, useTheme } from '@mui/material';
+import { Box, Button, FormControlLabel, Grid, RadioGroup, Slider, Typography, useTheme } from '@mui/material';
 import { boxMargin, boxWidth, canvasMargin, scaleFactor, textHeight, yearHeight } from '../../utils/drawContributions';
-import { RefObject } from 'react';
+import { ChangeEvent, Dispatch, RefObject, SetStateAction } from 'react';
+import CustomRadio from '../CustomRadio';
 
 interface Props {
+  isDesktop: boolean;
   contributionRef: RefObject<HTMLCanvasElement>;
   loading: boolean;
   sliderValue: number;
   handleSliderChange: (event: Event, newValue: number | number[]) => void;
+  mobileSelectedGroup: number;
+  setMobileSelectedGroup: Dispatch<SetStateAction<number>>;
 }
 
 const marks = Array.from({ length: 52 })
@@ -20,8 +24,62 @@ const marks = Array.from({ length: 52 })
   .filter((a) => a !== undefined);
 
 const Step1 = (props: Props) => {
-  const { loading, contributionRef, sliderValue, handleSliderChange } = props;
+  const {
+    isDesktop,
+    loading,
+    contributionRef,
+    sliderValue,
+    handleSliderChange,
+    mobileSelectedGroup,
+    setMobileSelectedGroup
+  } = props;
+
   const theme = useTheme();
+  const months = ['I', 'II', 'III', 'IV', 'V'];
+
+  const handleRadioChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLInputElement;
+    const _val = target.value;
+    setMobileSelectedGroup(Number(_val));
+  };
+
+  if (!isDesktop) {
+    return (
+      <RadioGroup
+        name='room.space'
+        value={mobileSelectedGroup}
+        onChange={handleRadioChange}
+        sx={{ flexDirection: 'row', mb: 1 }}
+      >
+        <Grid container spacing={3} sx={{ mb: 1 }}>
+          {months.map((month, i) => (
+            <Grid key={month} item xs={4}>
+              <FormControlLabel
+                sx={{ m: 0, flexBasis: { xs: 0, md: '25%', xl: 0 } }}
+                value={i + 1}
+                control={
+                  <CustomRadio>
+                    <Typography
+                      variant='body2'
+                      component={Button}
+                      fontWeight={500}
+                      sx={{
+                        filter: 'drop-shadow(0 0 .3rem #ffffff70)',
+                        fontSize: { xs: '1.5rem', md: '3.75rem' }
+                      }}
+                    >
+                      {month}
+                    </Typography>
+                  </CustomRadio>
+                }
+                label=''
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </RadioGroup>
+    );
+  }
 
   return (
     <Box>

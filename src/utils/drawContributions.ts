@@ -123,10 +123,7 @@ function getDateInfo(data: DataStruct, date: string) {
   return data.contributions.find((contrib) => contrib.date === date);
 }
 
-function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
-  const { offsetX = 0, offsetY = 0, data } = opts;
-  const theme = getTheme(opts);
-
+export function getContributionData(data: DataStruct) {
   const today = new Date();
   const thisYear = format(today, 'yyyy');
   const lastDate = data.year === thisYear ? today : parseISO(data.range.end);
@@ -176,6 +173,59 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       }
 
       contributionGrid[y][x] = Number(day.info.intensity);
+    }
+  }
+
+  return contributionGrid;
+}
+
+function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
+  const { offsetX = 0, offsetY = 0, data } = opts;
+  const theme = getTheme(opts);
+
+  const today = new Date();
+  const thisYear = format(today, 'yyyy');
+  const lastDate = data.year === thisYear ? today : parseISO(data.range.end);
+  const firstRealDate = parseISO(`${data.year}-01-01`);
+  const firstDate = startOfWeek(firstRealDate);
+
+  let nextDate = firstDate;
+  const firstRowDates: GraphEntry[] = [];
+  const graphEntries: GraphEntry[][] = [];
+
+  while (isBefore(nextDate, lastDate)) {
+    const date = format(nextDate, DATE_FORMAT);
+    firstRowDates.push({
+      date,
+      info: getDateInfo(data, date)
+    });
+    nextDate = addWeeks(nextDate, 1);
+  }
+
+  graphEntries.push(firstRowDates);
+
+  for (let i = 1; i < 7; i += 1) {
+    graphEntries.push(
+      firstRowDates.map((dateObj) => {
+        const date = format(setDay(parseISO(dateObj.date), i), DATE_FORMAT);
+
+        return {
+          date,
+          info: getDateInfo(data, date)
+        };
+      })
+    );
+  }
+
+  // 7
+  for (let y = 0; y < graphEntries.length; y += 1) {
+    // 52 | 53
+    for (let x = 0; x < graphEntries[y].length; x += 1) {
+      const day = graphEntries[y][x];
+      const cellDate = parseISO(day.date);
+      if (isAfter(cellDate, lastDate) || !day.info) {
+        continue;
+      }
 
       const color = theme[`grade${day.info.intensity}`];
       ctx.fillStyle = color;
@@ -196,8 +246,6 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       lastCountedMonth = month;
     }
   }
-
-  return contributionGrid;
 }
 
 function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) {

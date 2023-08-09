@@ -3,11 +3,12 @@ import Image from 'next/image';
 import { RefObject } from 'react';
 
 interface Props {
+  isDesktop: boolean;
   selectedContributionRef: RefObject<HTMLCanvasElement>;
   extractedSelectedContributionRef: RefObject<HTMLCanvasElement>;
   showExtracted: boolean;
   pieces: string[];
-  tetrisPieces: Record<string, number>;
+  tetrisPieces: Record<string, number> | undefined;
 }
 
 const fadeIn = keyframes`
@@ -28,7 +29,28 @@ const styles = {
 };
 
 const Step2 = (props: Props) => {
-  const { selectedContributionRef, extractedSelectedContributionRef, showExtracted, pieces, tetrisPieces } = props;
+  const { isDesktop, selectedContributionRef, extractedSelectedContributionRef, showExtracted, pieces, tetrisPieces } =
+    props;
+
+  if (!isDesktop) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant='body2' sx={{ textTransform: 'uppercase' }}>
+            Contributions
+          </Typography>
+
+          <canvas
+            ref={extractedSelectedContributionRef}
+            style={{
+              width: '80vw',
+              height: 'calc(calc(80vh / 100vw) * 80vw)'
+            }}
+          />
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', gap: 5 }}>
@@ -42,7 +64,7 @@ const Step2 = (props: Props) => {
         <canvas ref={extractedSelectedContributionRef} />
       </Box>
 
-      {showExtracted && (
+      {showExtracted && tetrisPieces && (
         <Box sx={[{ display: 'flex', flexDirection: 'column' }, showExtracted && styles.fadeStyle]}>
           <Typography variant='overline'>Extracted Pieces</Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>

@@ -70,20 +70,28 @@ export default function Home() {
         component='h1'
         fontWeight={500}
         sx={{
-          filter: 'drop-shadow(0 0 .3rem #ffffff70)'
+          filter: 'drop-shadow(0 0 .3rem #ffffff70)',
+          fontSize: { xs: '1.5rem', md: '3.75rem' }
         }}
       >
         Your GitHub story as Tetris
       </Typography>
 
-      <Typography variant='body1' mt={2.5} color='grey'>
+      <Typography
+        variant='body1'
+        mt={{ xs: 1, md: 2.5 }}
+        color='grey'
+        sx={{
+          fontSize: { xs: '0.85rem', md: '1rem' }
+        }}
+      >
         Enter your GitHub username to
         <br />
         generate tetris from your contribution graph
       </Typography>
 
       <Box
-        mt={3.25}
+        mt={{ xs: 2, md: 3.25 }}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -101,7 +109,7 @@ export default function Home() {
             '& .MuiOutlinedInput-root': {
               color: 'inherit',
               borderRadius: '8px',
-              fontSize: '1.15rem',
+              fontSize: { xs: '0.95rem', md: '1.15rem' },
 
               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                 boxShadow: '0 0 1.25rem 0.15rem rgba(39, 213, 69, 0.5)',
@@ -130,7 +138,7 @@ export default function Home() {
                   gap: 1
                 }}
               >
-                <Typography sx={{ fontSize: '1.15rem', color: '#687473' }}>|</Typography>
+                <Typography sx={{ fontSize: { xs: '0.95rem', md: '1.15rem' }, color: '#687473' }}>|</Typography>
 
                 <Select
                   variant='standard'

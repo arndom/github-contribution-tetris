@@ -1,95 +1,69 @@
 import React from 'react';
 import type { Controller } from './react-tetris/components/Tetris';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
+import { ArrowDropDown, ArrowLeft, ArrowRight, KeyboardDoubleArrowDown, Pause, Refresh } from '@mui/icons-material';
 
 type Props = {
   controller: Controller;
 };
 
 export default function Controller({ controller }: Props): JSX.Element {
-  if (true) return <></>;
-
   return (
     <Box
+      mt={2}
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '24px 12px'
+        px: 0.5,
+
+        '& .MuiButton-root': {
+          p: 0.5,
+          minWidth: 40,
+          width: 40,
+          height: 38,
+
+          '& .MuiSvgIcon-root': {
+            width: '1.25em',
+            height: '1.25em'
+          }
+        }
       }}
     >
-      <Box
-        sx={{
-          padding: '18px',
-          border: '1px solid #DDD',
-          borderRadius: '72px'
-        }}
-      >
-        <Box sx={styles.dpadRow}>
-          <button style={styles.upDown} onClick={controller.flipClockwise} />
+      <Box sx={{ flexBasis: '50%', display: 'flex', gap: 1.25, flexDirection: 'column', alignItems: 'center' }}>
+        <Button variant='contained' onClick={controller.flipClockwise}>
+          <Refresh />
+        </Button>
+
+        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+          <Button variant='contained' onClick={controller.moveLeft}>
+            <ArrowLeft />
+          </Button>
+
+          <Button variant='contained' onClick={controller.moveRight}>
+            <ArrowRight />
+          </Button>
         </Box>
-        <Box sx={[styles.dpadRow, styles.dpadMidRow]}>
-          <button style={styles.leftRight} onClick={controller.moveLeft} />
-          <button style={styles.leftRight} onClick={controller.moveRight} />
-        </Box>
-        <Box sx={styles.dpadRow}>
-          <button style={styles.upDown} onClick={controller.moveDown} />
-        </Box>
+
+        <Button variant='contained' onClick={controller.moveDown}>
+          <ArrowDropDown />
+        </Button>
       </Box>
 
-      <Box>
-        <Box sx={styles.row}>
-          <button style={styles.roundBtn} onClick={controller.hardDrop} />
+      <Box sx={{ display: 'flex', gap: 1.25, flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+          <Button sx={{ width: 46, height: 46 }} />
+          <Button color='warning' variant='contained' onClick={controller.pause}>
+            <Pause />
+          </Button>
         </Box>
-        <Box sx={[styles.row, styles.midRow]}>
-          <button style={styles.roundBtn} onClick={controller.hold} />
-          <button style={styles.roundBtn} onClick={controller.flipClockwise} />
-        </Box>
-        <Box sx={styles.row}>
-          <button style={styles.roundBtn} onClick={controller.flipCounterclockwise} />
+
+        <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-start' }}>
+          <Button color='warning' variant='contained' onClick={controller.hardDrop}>
+            <KeyboardDoubleArrowDown />
+          </Button>
         </Box>
       </Box>
     </Box>
   );
 }
-
-const dpadSize = 36;
-
-const styles = {
-  dpadRow: {
-    display: 'flex',
-    justifyContent: 'center',
-    height: `${dpadSize}px`,
-    width: `${dpadSize * 3}px`
-  },
-  dpadMidRow: {
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  leftRight: {
-    width: `${dpadSize}px`,
-    height: `${dpadSize}px`,
-    border: '2px solid #ddd'
-  },
-  upDown: {
-    width: `${dpadSize}px`,
-    height: `${dpadSize}px`,
-    border: '2px solid #ddd'
-  },
-  roundBtn: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '24px',
-    border: '2px solid #ddd'
-  },
-  row: {
-    display: 'flex',
-    justifyContent: 'center',
-    height: '48px',
-    width: '144px'
-  },
-  midRow: {
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  }
-};

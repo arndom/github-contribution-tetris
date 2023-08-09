@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { Typography, Box, Button, Backdrop, CircularProgress, Link } from '@mui/material';
+import { Typography, Box, Button, Backdrop, CircularProgress, Link, useTheme, useMediaQuery } from '@mui/material';
 
 import { useRouter } from 'next/router';
 import axios from 'axios';
@@ -10,6 +10,7 @@ import {
   boxWidth,
   drawContributions,
   drawSelectedContributions,
+  getContributionData,
   scaleFactor
 } from '../utils/drawContributions';
 import { countPieces } from '../utils/generateTetrisPieces';
@@ -17,6 +18,7 @@ import { countPieces } from '../utils/generateTetrisPieces';
 import Step1 from '../components/steps/Step1';
 import Step2 from '../components/steps/Step2';
 import Step3 from '../components/steps/Step3';
+import { getRandomInt } from '../utils/common';
 
 const marks = Array.from({ length: 52 })
   .map((a, i) => {
@@ -31,7 +33,7 @@ const marks = Array.from({ length: 52 })
 const steps = ['GRAPH', 'EXTRACTED', 'GAME'];
 const pieces = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
 
-// TODO: hotfix -> refactor to CSR to fix 504 error
+// TODO: figure out orientation for mobile
 const User = () => {
   const [data, setData] = useState<DataStruct | null>();
   const router = useRouter();
@@ -50,10 +52,14 @@ const User = () => {
   const [tetrisPieces, setTetrisPieces] = useState<Record<string, number>>();
   const [showExtracted, setShowExtracted] = useState(false);
   const [initLoading, setInitLoading] = useState(true);
+  const [mobileSelectedGroup, setMobileSelectedGroup] = useState(getRandomInt(1, 5)); // 1 - 5
 
   const [currentStep, setCurrentStep] = useState(0);
   const incrementStep = () => setCurrentStep((prev) => ++prev);
   const decrementStep = () => setCurrentStep((prev) => --prev);
+
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
     setSliderValue(newValue as number);
@@ -77,26 +83,44 @@ const User = () => {
     }
   }, [user, year]);
 
-  // get contribution data
+  // draw initial contribution data
   useEffect(() => {
-    if (contributionRef.current && data && currentStep === 0) {
-      const c = drawContributions(contributionRef.current, {
-        data,
-        username: String(user),
-        themeName: 'githubDark',
-        skipHeader: true
-      });
+    if (data && currentStep === 0) {
+      const _contributionGrid = getContributionData(data);
 
-      setContributionGrid(c);
+      const getMobileCOntributionGrid = () => {
+        const endPoint = mobileSelectedGroup * 10;
+        const startPoint = endPoint === 10 ? 0 : endPoint - 10;
+        const grid = _contributionGrid.map((row) => row.slice(startPoint, endPoint));
+
+        return grid;
+      };
+
+      const _mobileContributionGrid = getMobileCOntributionGrid();
+
+      if (!isDesktop) {
+        setContributionGrid(_mobileContributionGrid);
+      }
+
+      if (contributionRef.current && isDesktop) {
+        drawContributions(contributionRef.current, {
+          data,
+          username: String(user),
+          themeName: 'githubDark',
+          skipHeader: true
+        });
+
+        setContributionGrid(_contributionGrid);
+      }
     }
-  }, [data, user, contributionRef, currentStep]);
+  }, [data, user, contributionRef, currentStep, isDesktop, mobileSelectedGroup]);
 
   // loading for contribution slider
   useEffect(() => {
     if (contributionGrid.length > 0) setLoading(false);
   }, [contributionGrid.length]);
 
-  // generate selected contribution data
+  // get selected contribution data
   useEffect(() => {
     if (contributionGrid.length > 0) {
       setShowExtracted(false);
@@ -129,27 +153,50 @@ const User = () => {
 
   // draw selected & extracted contribution data
   useEffect(() => {
-    if (
-      selectedContributionRef.current &&
-      extractedSelectedContributionRef.current &&
-      selectedContributions.length > 0 &&
-      extractedSelectedContributions.length > 0 &&
-      tetrisPieces &&
-      currentStep === 1
-    ) {
-      drawSelectedContributions(selectedContributionRef.current, selectedContributions);
-      drawSelectedContributions(extractedSelectedContributionRef.current, selectedContributions);
-
-      setTimeout(() => {
+    if (!isDesktop) {
+      if (
         extractedSelectedContributionRef.current &&
-          drawSelectedContributions(extractedSelectedContributionRef.current, extractedSelectedContributions);
-      }, 1800);
+        selectedContributions.length > 0 &&
+        extractedSelectedContributions.length > 0 &&
+        tetrisPieces &&
+        currentStep === 1
+      ) {
+        drawSelectedContributions(extractedSelectedContributionRef.current, selectedContributions);
 
-      setTimeout(() => {
-        setShowExtracted(true);
-      }, 2500);
+        setTimeout(() => {
+          extractedSelectedContributionRef.current &&
+            drawSelectedContributions(extractedSelectedContributionRef.current, extractedSelectedContributions);
+        }, 1800);
+
+        setTimeout(() => {
+          setShowExtracted(true);
+        }, 2500);
+      }
     }
-  }, [selectedContributions, extractedSelectedContributions, currentStep, tetrisPieces]);
+
+    if (isDesktop) {
+      if (
+        selectedContributionRef.current &&
+        extractedSelectedContributionRef.current &&
+        selectedContributions.length > 0 &&
+        extractedSelectedContributions.length > 0 &&
+        tetrisPieces &&
+        currentStep === 1
+      ) {
+        drawSelectedContributions(selectedContributionRef.current, selectedContributions);
+        drawSelectedContributions(extractedSelectedContributionRef.current, selectedContributions);
+
+        setTimeout(() => {
+          extractedSelectedContributionRef.current &&
+            drawSelectedContributions(extractedSelectedContributionRef.current, extractedSelectedContributions);
+        }, 1800);
+
+        setTimeout(() => {
+          setShowExtracted(true);
+        }, 2500);
+      }
+    }
+  }, [selectedContributions, extractedSelectedContributions, currentStep, tetrisPieces, isDesktop]);
 
   if (initLoading) {
     return (
@@ -185,18 +232,49 @@ const User = () => {
 
   return (
     <>
-      {steps[currentStep] === steps[0] && <Step1 {...{ loading, contributionRef, sliderValue, handleSliderChange }} />}
-      {steps[currentStep] === steps[1] && tetrisPieces && (
-        <Step2
-          {...{ selectedContributionRef, extractedSelectedContributionRef, showExtracted, pieces, tetrisPieces }}
+      {steps[currentStep] === steps[0] && (
+        <Step1
+          {...{
+            isDesktop,
+            loading,
+            contributionRef,
+            sliderValue,
+            handleSliderChange,
+            mobileSelectedGroup,
+            setMobileSelectedGroup
+          }}
         />
       )}
-      {steps[currentStep] === steps[2] && tetrisPieces && <Step3 {...{ tetrisPieces }} />}
+
+      {steps[currentStep] === steps[1] && (
+        <Step2
+          {...{
+            isDesktop,
+            selectedContributionRef,
+            extractedSelectedContributionRef,
+            showExtracted,
+            pieces,
+            tetrisPieces
+          }}
+        />
+      )}
+
+      {steps[currentStep] === steps[2] && tetrisPieces && <Step3 {...{ isDesktop, tetrisPieces }} />}
 
       {currentStep === 0 && (
-        <Typography variant='body1' color='grey'>
-          Use the slider to select your playable section
-        </Typography>
+        <>
+          {!isDesktop && (
+            <Typography variant='body1' color='grey'>
+              Pick a Period of contributions
+            </Typography>
+          )}
+
+          {isDesktop && (
+            <Typography variant='body1' color='grey'>
+              Use the slider to select your playable section
+            </Typography>
+          )}
+        </>
       )}
 
       {!(currentStep === 2) && (

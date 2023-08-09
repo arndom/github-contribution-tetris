@@ -11,6 +11,8 @@ export default function Footer() {
         justifyContent: 'flex-end',
 
         a: {
+          fontSize: { xs: '0.65rem', md: '0.75rem' },
+
           '&::after': {
             content: '"|"',
             opacity: '0.25',
@@ -18,7 +20,8 @@ export default function Footer() {
           },
 
           '&:last-child::after': {
-            content: '""'
+            content: '""',
+            margin: 0
           }
         }
       }}

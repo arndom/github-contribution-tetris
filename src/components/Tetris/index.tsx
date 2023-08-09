@@ -4,12 +4,13 @@ import { Piece } from './react-tetris/models/Piece';
 
 interface Props {
   initialQueue: Piece[];
+  isDesktop: boolean;
 }
 
 const Tetris = (props: Props) => {
   return (
     <Box sx={styles.root}>
-      <GamePanel initialQueue={props.initialQueue} />
+      <GamePanel initialQueue={props.initialQueue} isDesktop={props.isDesktop} />
     </Box>
   );
 };
