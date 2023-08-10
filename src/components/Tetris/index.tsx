@@ -25,10 +25,6 @@ const styles = {
       background: '#161b22'
     },
 
-    '& .piece-view': {
-      marginBottom: '12px'
-    },
-
     '& .piece-view .game-block': {
       width: '18px',
       height: '18px'

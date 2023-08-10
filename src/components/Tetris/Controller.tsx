@@ -10,7 +10,7 @@ type Props = {
 export default function Controller({ controller }: Props): JSX.Element {
   return (
     <Box
-      mt={2}
+      mt={2.5}
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -21,7 +21,8 @@ export default function Controller({ controller }: Props): JSX.Element {
           p: 0.5,
           minWidth: 40,
           width: 40,
-          height: 38,
+          height: 40,
+          borderRadius: '100%',
 
           '& .MuiSvgIcon-root': {
             width: '1.25em',

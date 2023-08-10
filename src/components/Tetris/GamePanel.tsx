@@ -255,9 +255,9 @@ const styles = {
 
   gameboardContainer: {
     display: 'flex',
-    alignItems: 'flex-start',
     justifyContent: 'center',
-    gap: '15px'
+    gap: '15px',
+    height: '100%'
   },
 
   pieceQueue: {
