@@ -19,9 +19,9 @@ export default function Controller({ controller }: Props): JSX.Element {
 
         '& .MuiButton-root': {
           p: 0.5,
-          minWidth: 40,
-          width: 40,
-          height: 40,
+          minWidth: 42,
+          width: 42,
+          height: 42,
           borderRadius: '100%',
 
           '& .MuiSvgIcon-root': {
@@ -31,7 +31,7 @@ export default function Controller({ controller }: Props): JSX.Element {
         }
       }}
     >
-      <Box sx={{ flexBasis: '50%', display: 'flex', gap: 1.25, flexDirection: 'column', alignItems: 'center' }}>
+      <Box sx={{ flexBasis: '50%', display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center' }}>
         <Button variant='contained' onClick={controller.flipClockwise}>
           <Refresh />
         </Button>
@@ -51,19 +51,17 @@ export default function Controller({ controller }: Props): JSX.Element {
         </Button>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 1.25, flexDirection: 'column' }}>
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <Button sx={{ width: 46, height: 46 }} />
+      <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
+          <Button />
           <Button color='warning' variant='contained' onClick={controller.pause}>
             <Pause />
           </Button>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-start' }}>
-          <Button color='warning' variant='contained' onClick={controller.hardDrop}>
-            <KeyboardDoubleArrowDown />
-          </Button>
-        </Box>
+        <Button color='warning' variant='contained' onClick={controller.hardDrop}>
+          <KeyboardDoubleArrowDown />
+        </Button>
       </Box>
     </Box>
   );

@@ -30,7 +30,7 @@ const Layout = (props: Props) => {
             justifyContent: 'center',
             alignItems: 'center',
             textAlign: 'center',
-            minHeight: 'calc(100vh - 36px)'
+            minHeight: { xs: 'calc(100vh - 64px)', md: 'calc(100vh - 36px)' }
           }}
         >
           {children}
