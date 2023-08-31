@@ -69,14 +69,14 @@ export default function MyApp(props: MyAppProps) {
         <meta property='og:url' content='https://gh-tetris.vercel.app/' />
         <meta property='og:title' content='GH Tetris' />
         <meta property='og:description' content='Generated game of tetris from your github contributions' />
-        <meta property='og:image' content='%PUBLIC_URL%/banner.png' />
+        <meta property='og:image' content='/banner.png' />
 
         {/* <!-- Twitter --> */}
         <meta property='twitter:card' content='summary_large_image' />
         <meta property='twitter:url' content='https://gh-tetris.vercel.app/' />
         <meta property='twitter:title' content='GH Tetris' />
         <meta property='twitter:description' content='Generated game of tetris from your github contributions' />
-        <meta property='twitter:image' content='%PUBLIC_URL%/banner.png' />
+        <meta property='twitter:image' content='/banner.png' />
       </Head>
 
       <ThemeProvider theme={theme}>
