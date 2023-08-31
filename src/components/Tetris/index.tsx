@@ -4,12 +4,13 @@ import { Piece } from './react-tetris/models/Piece';
 
 interface Props {
   initialQueue: Piece[];
+  isDesktop: boolean;
 }
 
 const Tetris = (props: Props) => {
   return (
     <Box sx={styles.root}>
-      <GamePanel initialQueue={props.initialQueue} />
+      <GamePanel initialQueue={props.initialQueue} isDesktop={props.isDesktop} />
     </Box>
   );
 };
@@ -22,10 +23,6 @@ const styles = {
       width: '21px',
       height: '21px',
       background: '#161b22'
-    },
-
-    '& .piece-view': {
-      marginBottom: '12px'
     },
 
     '& .piece-view .game-block': {

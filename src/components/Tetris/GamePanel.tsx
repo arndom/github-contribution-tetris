@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Button, Box, Dialog, Typography, useTheme } from '@mui/material';
 
-// import Controller from './Controller';
+import Controller from './Controller';
 import Tetris from './react-tetris/components/Tetris';
+import { Piece } from './react-tetris/models/Piece';
 
 import {
   KeyboardArrowDownOutlined,
@@ -10,9 +11,9 @@ import {
   KeyboardArrowRightOutlined,
   KeyboardArrowUpOutlined
 } from '@mui/icons-material';
-import { Piece } from './react-tetris/models/Piece';
 
 type Props = {
+  isDesktop: boolean;
   initialQueue?: Piece[];
 };
 
@@ -80,6 +81,7 @@ const keyMap = [
 
 const GamePanel = (props: Props): JSX.Element => {
   const initialQueue = props.initialQueue ? props.initialQueue : undefined;
+  const { isDesktop } = props;
 
   const theme = useTheme();
   const [isNewGame, setIsNewGame] = useState(true);
@@ -118,61 +120,67 @@ const GamePanel = (props: Props): JSX.Element => {
                 </Box>
               </Box>
 
-              <Typography variant='subtitle2' sx={{ color: 'grey' }} mt={0.5} mb={0.85}>
-                Keys
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', justifyContent: 'center' }}>
-                {keyMap.map((key) => (
-                  <Box
-                    key={key.text}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      '& .MuiSvgIcon-root': {
-                        fill: theme.palette.primary.main,
-                        fontSize: '1rem'
-                      }
-                    }}
-                  >
-                    <Typography
-                      variant='overline'
-                      color='grey'
-                      sx={{ lineHeight: 0.75, fontSize: '0.6rem' }}
-                      fontWeight={700}
-                    >
-                      {key.text}
-                    </Typography>
-                    {key.component}
-                  </Box>
-                ))}
-              </Box>
-
-              {/* TODO: find a way to handle keyboard click restart without interuptting process */}
-              {initialQueue && isNewGame && (
-                <Box sx={{ display: 'grid', placeItems: 'center' }}>
-                  <Typography variant='subtitle2' sx={{ fontSize: '0.75rem' }} color='grey' mt={2}>
-                    Extracted Pieces
+              {isDesktop && (
+                <>
+                  <Typography variant='subtitle2' sx={{ color: 'grey' }} mt={0.5} mb={0.85}>
+                    Keys
                   </Typography>
-
-                  <Box sx={{ display: 'flex' }}>
-                    {initialQueue.map((piece, i) => (
-                      <Typography
-                        mr={1}
-                        key={`${piece}${i}`}
-                        color='primary'
-                        sx={{ fontSize: '0.7rem', fontWeight: 900 }}
+                  <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {keyMap.map((key) => (
+                      <Box
+                        key={key.text}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          '& .MuiSvgIcon-root': {
+                            fill: theme.palette.primary.main,
+                            fontSize: '1rem'
+                          }
+                        }}
                       >
-                        {piece}
-                      </Typography>
+                        <Typography
+                          variant='overline'
+                          color='grey'
+                          sx={{ lineHeight: 0.75, fontSize: '0.6rem' }}
+                          fontWeight={700}
+                        >
+                          {key.text}
+                        </Typography>
+                        {key.component}
+                      </Box>
                     ))}
                   </Box>
-                </Box>
+                </>
               )}
 
-              {/* TODO: add mobile/tab */}
-              {/* Temp disabled */}
-              {/* <Controller controller={controller} /> */}
+              {/* TODO: find a way to handle keyboard click restart without interuptting process */}
+              {isDesktop && (
+                <>
+                  {initialQueue && isNewGame && (
+                    <Box sx={{ display: 'grid', placeItems: 'center' }}>
+                      <Typography variant='subtitle2' sx={{ fontSize: '0.75rem' }} color='grey' mt={2}>
+                        Extracted Pieces
+                      </Typography>
+
+                      <Box sx={{ display: 'flex' }}>
+                        {initialQueue.map((piece, i) => (
+                          <Typography
+                            mr={1}
+                            key={`${piece}${i}`}
+                            color='primary'
+                            sx={{ fontSize: '0.7rem', fontWeight: 900 }}
+                          >
+                            {piece}
+                          </Typography>
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+                </>
+              )}
+
+              {!isDesktop && <Controller controller={controller} />}
             </Box>
 
             <Dialog open={state === 'PAUSED'}>
@@ -247,9 +255,9 @@ const styles = {
 
   gameboardContainer: {
     display: 'flex',
-    alignItems: 'flex-start',
     justifyContent: 'center',
-    gap: '15px'
+    gap: '15px',
+    height: '100%'
   },
 
   pieceQueue: {
