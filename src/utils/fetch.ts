@@ -1,3 +1,8 @@
+// move to the api of this
+// https://github.com/sallar/github-contributions-chart
+// https://github-contributions.vercel.app/
+// https://github-contributions.vercel.app/api/v1/{username}
+
 import cheerio from 'cheerio';
 import { DataStruct } from './drawContributions';
 
@@ -11,27 +16,41 @@ const COLOR_MAP = {
 };
 
 async function fetchYears(username: string) {
-  const data = await fetch(`https://github.com/${username}`);
+  const data = await fetch(`https://github.com/${username}?tab=contributions`, {
+    headers: {
+      'x-requested-with': 'XMLHttpRequest'
+    }
+  });
+
   const $ = cheerio.load(await data.text());
 
-  return $('.js-year-link')
+  return $('.js-year-link') // side bar of years
     .get()
     .map((a) => {
       const $a = $(a);
+      const href = $a.attr('href');
+      const githubUrl = new URL(`https://github.com${href}`);
+      githubUrl.searchParams.set('tab', 'contributions');
+      const formattedHref = `${githubUrl.pathname}${githubUrl.search}`;
 
       return {
-        href: $a.attr('href'),
+        href: formattedHref,
         text: $a.text().trim()
       };
     });
 }
 
 async function fetchDataForYear(url: string, year: number) {
-  const data = await fetch(`https://github.com${url}`);
+  const data = await fetch(`https://github.com${url}`, {
+    headers: {
+      'x-requested-with': 'XMLHttpRequest'
+    }
+  });
   const $ = cheerio.load(await data.text());
 
-  const $days = $('table.ContributionCalendar-grid td.ContributionCalendar-day');
-  const contribText = $('.js-yearly-contributions h2')
+  const $days = $('table.ContributionCalendar-grid td.ContributionCalendar-day'); // actual-table individual-square-in-table
+
+  const contribText = $('.js-yearly-contributions h2') // wrapper for table, now: js-calendar-graph
     .text()
     .trim()
     .match(/^([0-9,]+)\s/);
@@ -61,10 +80,10 @@ async function fetchDataForYear(url: string, year: number) {
             : '';
 
         const value = {
-          date: $day.attr('data-date'),
-          count: parseInt($day.text().split(' ')[0], 10) || 0,
+          date: $day.attr('data-date'), // contribution date
+          count: parseInt($day.text().split(' ')[0], 10) || 0, // then what is this, redundancy?
           color,
-          intensity: $day.attr('data-level') || 0
+          intensity: $day.attr('data-level') || 0 // contribution count
         };
 
         return { date, value };
