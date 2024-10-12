@@ -1,46 +1,37 @@
-import { useState } from 'react';
+import { ChangeEvent, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-
-import {
-  TextField,
-  Typography,
-  Box,
-  useTheme,
-  Button,
-  InputAdornment,
-  Select,
-  SelectChangeEvent,
-  MenuItem,
-  CircularProgress
-} from '@mui/material';
-
+import { Typography, SelectChangeEvent, MenuItem } from '@mui/material';
 import axios from 'axios';
+import Header from '../components/pages/home/header';
+import YearSelect from '../components/pages/home/year-select';
+import {
+  Loader,
+  LoadingButton,
+  UserInput,
+  UserInputDivider,
+  UserInputEndAdornment,
+  UserInputHolder
+} from '../components/pages/home/user-input';
+import useGitHubYears from '../hooks/use-github-years';
 
 export default function Home() {
-  const theme = useTheme();
   const router = useRouter();
 
   const [year, setYear] = useState(`${new Date().getFullYear()}`);
   const [loading, setLoading] = useState(false);
-  const [userError, setUserError] = useState('');
   const [user, setUser] = useState('');
+  const [userError, setUserError] = useState('');
 
+  const githubYears = useGitHubYears();
   const isUserError = userError.replace(/\s/g, '').length !== 0;
 
-  // current year to year github was founded(2008)
-  const years = () => {
-    let currentYear = new Date().getFullYear();
-    const _years = [currentYear];
-
-    while (currentYear !== 2008) {
-      _years.push(--currentYear);
-    }
-
-    return _years;
+  const handleYearChange = (e: SelectChangeEvent<unknown>) => {
+    const _year = String(e.target.value);
+    setYear(_year);
   };
 
-  const handleYearChange = (event: SelectChangeEvent) => {
-    setYear(event.target.value);
+  const handleUserInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setUser(String(e.target.value).replace(/\s/g, ''));
   };
 
   const handleSubmit = () => {
@@ -63,148 +54,49 @@ export default function Home() {
       });
   };
 
+  const hasUserInputted = useMemo(() => {
+    const userLength = user.replace(/\s/g, '').length;
+
+    return userLength === 0;
+  }, [user]);
+
   return (
     <>
-      <Typography
-        variant='h2'
-        component='h1'
-        fontWeight={500}
-        sx={{
-          filter: 'drop-shadow(0 0 .3rem #ffffff70)',
-          fontSize: { xs: '1.5rem', md: '3.75rem' }
-        }}
-      >
-        Your GitHub story as Tetris
-      </Typography>
+      <Header />
 
-      <Typography
-        variant='body1'
-        mt={{ xs: 1, md: 2.5 }}
-        color='grey'
-        sx={{
-          fontSize: { xs: '0.85rem', md: '1rem' }
-        }}
-      >
-        Enter your GitHub username to
-        <br />
-        generate tetris from your contribution graph
-      </Typography>
-
-      <Box
-        mt={{ xs: 2, md: 3.25 }}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2
-        }}
-      >
-        <TextField
+      <UserInputHolder>
+        <UserInput
           value={user}
-          onChange={(e) => setUser(String(e.target.value).replace(/\s/g, ''))}
+          onChange={handleUserInputChange}
           variant='outlined'
           placeholder='username'
           name='gh_username'
           error={isUserError}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              color: 'inherit',
-              borderRadius: '8px',
-              fontSize: { xs: '0.95rem', md: '1.15rem' },
-
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                boxShadow: '0 0 1.25rem 0.15rem rgba(39, 213, 69, 0.5)',
-                borderWidth: '2px'
-              },
-
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'unset',
-                borderWidth: '2px',
-                boxShadow: '0 0 1.25rem 0.15rem rgba(39, 213, 69, 0.25)'
-              },
-
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: theme.palette.primary.main,
-                borderWidth: '2px'
-              }
-            }
-          }}
           InputProps={{
             endAdornment: (
-              <InputAdornment
-                position='end'
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}
-              >
-                <Typography sx={{ fontSize: { xs: '0.95rem', md: '1.15rem' }, color: '#687473' }}>|</Typography>
+              <UserInputEndAdornment position='end'>
+                <UserInputDivider>|</UserInputDivider>
 
-                <Select
-                  variant='standard'
-                  label='Year'
-                  value={year}
-                  onChange={handleYearChange}
-                  sx={{
-                    '& .MuiSelect-select': {
-                      color: '#fff',
-                      letterSpacing: '0.045em'
-                    },
-
-                    '& .MuiSvgIcon-root': {
-                      color: '#fff'
-                    },
-
-                    '&:after, :before': {
-                      border: 'none'
-                    },
-
-                    '&:hover:not(.Mui-disabled, .Mui-error):before': {
-                      border: 'none'
-                    }
-                  }}
-                  MenuProps={{
-                    sx: {
-                      '& .MuiPaper-root': {
-                        background: theme.palette.background.default,
-                        maxHeight: '180px'
-                      }
-                    }
-                  }}
-                >
-                  {years().map((yr) => (
+                <YearSelect label='Year' value={year} onChange={handleYearChange}>
+                  {githubYears.map((yr) => (
                     <MenuItem key={yr} value={yr}>
                       {yr}
                     </MenuItem>
                   ))}
-                </Select>
+                </YearSelect>
 
                 {!loading && (
-                  <Button
-                    disabled={user.replace(/\s/g, '').length === 0}
-                    onClick={handleSubmit}
-                    sx={{
-                      borderRadius: '8px',
-                      boxShadow: 'none'
-                    }}
-                  >
+                  <LoadingButton disabled={hasUserInputted} onClick={handleSubmit}>
                     Generate
-                  </Button>
+                  </LoadingButton>
                 )}
 
-                {loading && (
-                  <CircularProgress
-                    sx={{
-                      color: 'rgba(39, 213, 69, 0.75)',
-                      filter: 'drop-shadow(0 0 .3rem #ffffff70)'
-                    }}
-                  />
-                )}
-              </InputAdornment>
+                {loading && <Loader />}
+              </UserInputEndAdornment>
             )
           }}
         />
-      </Box>
+      </UserInputHolder>
 
       {isUserError && (
         <Typography variant='body2' color='error' mt={2}>

@@ -61,8 +61,12 @@ export default function Tetris(props: Props): JSX.Element {
   const gameInit = props.initialQueue ? Game.init(props.initialQueue) : Game.init();
   const [game, dispatch] = useReducer(Game.update, gameInit);
   const keyboardMap = props.keyboardControls ?? defaultKeyboardMap;
-
   useKeyboardControls(keyboardMap, dispatch);
+
+  const moveSound = useMemo(() => new Audio('sound/move3.mp3'), []);
+  const gameOverSound = useMemo(() => new Audio('sound/gameOver.mp3'), []);
+  const dropSound = useMemo(() => new Audio('sound/drop.mp3'), []);
+
   const level = Game.getLevel(game);
 
   useEffect(() => {
@@ -78,20 +82,44 @@ export default function Tetris(props: Props): JSX.Element {
     };
   }, [game.state, level]);
 
+  useEffect(() => {
+    if (game.state === 'LOST') {
+      gameOverSound.play();
+    }
+  }, [game, gameOverSound]);
+
   const controller = useMemo(
     () => ({
       pause: () => dispatch('PAUSE'),
       resume: () => dispatch('RESUME'),
       hold: () => dispatch('HOLD'),
-      hardDrop: () => dispatch('HARD_DROP'),
-      moveDown: () => dispatch('MOVE_DOWN'),
-      moveLeft: () => dispatch('MOVE_LEFT'),
-      moveRight: () => dispatch('MOVE_RIGHT'),
-      flipClockwise: () => dispatch('FLIP_CLOCKWISE'),
-      flipCounterclockwise: () => dispatch('FLIP_COUNTERCLOCKWISE'),
+      hardDrop: () => {
+        dropSound.play();
+        dispatch('HARD_DROP');
+      },
+      moveDown: () => {
+        moveSound.play();
+        dispatch('MOVE_DOWN');
+      },
+      moveLeft: () => {
+        moveSound.play();
+        dispatch('MOVE_LEFT');
+      },
+      moveRight: () => {
+        moveSound.play();
+        dispatch('MOVE_RIGHT');
+      },
+      flipClockwise: () => {
+        moveSound.play();
+        dispatch('FLIP_CLOCKWISE');
+      },
+      flipCounterclockwise: () => {
+        moveSound.play();
+        dispatch('FLIP_COUNTERCLOCKWISE');
+      },
       restart: () => dispatch('RESTART')
     }),
-    [dispatch]
+    [dispatch, moveSound, dropSound]
   );
 
   return (

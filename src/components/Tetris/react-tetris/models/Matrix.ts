@@ -72,6 +72,8 @@ export function setPiece(matrix: Matrix, positionedPiece: PositionedPiece): [Mat
 
 function clearFullLines(matrix: Matrix): number {
   let linesCleared = 0;
+  const clearLineSound = new Audio('sound/clear.mp3');
+
   for (let y = 0; y < matrix.length; y++) {
     // it's a full line
     if (every(matrix[y]!)) {
@@ -79,6 +81,8 @@ function clearFullLines(matrix: Matrix): number {
       matrix.splice(y, 1);
       matrix.unshift(buildGameRow());
       linesCleared += 1;
+
+      clearLineSound.play();
     }
   }
 
