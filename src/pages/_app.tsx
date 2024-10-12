@@ -80,7 +80,6 @@ export default function MyApp(props: MyAppProps) {
       </Head>
 
       <ThemeProvider theme={theme}>
-        {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
         <GlobalStyles styles={() => GlobalStyling(theme)} />
         <Layout>

@@ -1,10 +1,6 @@
-// move to the api of this
-// https://github.com/sallar/github-contributions-chart
-// https://github-contributions.vercel.app/
-// https://github-contributions.vercel.app/api/v1/{username}
+// based off https://github.com/sallar/github-contributions-chart/blob/11aa7f9fb370dcc54685ffadea7eee3dbc9ad6fb/src/utils/api/fetch.js
 
 import cheerio from 'cheerio';
-import { DataStruct } from './drawContributions';
 
 // github_dark
 const COLOR_MAP = {
@@ -15,7 +11,11 @@ const COLOR_MAP = {
   4: '#27d545'
 };
 
-async function fetchYears(username: string) {
+/**
+ * @param username GH username
+ * @returns array of links of user's GH contributions
+ */
+export async function fetchYears(username: string) {
   const data = await fetch(`https://github.com/${username}?tab=contributions`, {
     headers: {
       'x-requested-with': 'XMLHttpRequest'
@@ -40,7 +40,13 @@ async function fetchYears(username: string) {
     });
 }
 
-async function fetchDataForYear(url: string, year: number) {
+/**
+ *
+ * @param url href to the link for a single GH contribution year
+ * @param year year of contribution
+ * @returns data of contributions for the year
+ */
+export async function fetchDataForYear(url: string, year: number) {
   const data = await fetch(`https://github.com${url}`, {
     headers: {
       'x-requested-with': 'XMLHttpRequest'
@@ -93,24 +99,4 @@ async function fetchDataForYear(url: string, year: number) {
       return $days.get().map((day: any) => parseDay(day).value);
     })()
   };
-}
-
-export async function checkUserExists(username: string) {
-  const years = await fetchYears(username);
-
-  if (years.length > 0) return true;
-
-  return false;
-}
-
-export async function fetchData(username: string, year: number) {
-  const years = await fetchYears(username);
-
-  if (years.length > 0) {
-    const selectedYear = years.filter((y) => Number(y.text) === year)[0];
-
-    return fetchDataForYear(String(selectedYear.href), Number(selectedYear.text)) as unknown as DataStruct;
-  }
-
-  return null;
 }
