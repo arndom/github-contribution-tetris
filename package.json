@@ -16,7 +16,7 @@
     "@emotion/styled": "latest",
     "@mui/icons-material": "latest",
     "@mui/material": "latest",
-    "axios": "^1.4.0",
+    "axios": "^1.8.2",
     "cheerio": "^1.0.0-rc.12",
     "date-fns": "^2.30.0",
     "lodash": "^4.17.21",
