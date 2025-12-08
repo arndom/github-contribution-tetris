@@ -20,10 +20,10 @@
     "cheerio": "^1.0.0-rc.12",
     "date-fns": "^2.30.0",
     "lodash": "^4.17.21",
-    "next": "latest",
+    "next": "^13.4.1",
     "nprogress": "^0.2.0",
-    "react": "latest",
-    "react-dom": "latest"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.31",
